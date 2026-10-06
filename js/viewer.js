@@ -14,10 +14,10 @@
   const ct = c => { const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
   const rr = (g, x, y, w, h, r) => { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); };
 
-  async function build(host, p) {
+  async function build(host, p, opts) {
     const booster = !!p.isBooster, canvas = host.querySelector("canvas");
     const r = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    r.setPixelRatio(Math.min(devicePixelRatio, 2)); r.useLegacyLights = true;
+    r.setPixelRatio(Math.min(devicePixelRatio, matchMedia("(pointer:coarse)").matches ? 1.5 : 2)); r.useLegacyLights = true;
     const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(35, 1, .1, 100), grp = new THREE.Group();
     sc.add(grp, new THREE.AmbientLight(0xffffff, .75));
     const d1 = new THREE.DirectionalLight(0xffffff, 1); d1.position.set(3, 4, 6);
@@ -51,25 +51,55 @@
       const ed = new THREE.MeshStandardMaterial({ color: 0xdddddd });
       grp.add(new THREE.Mesh(new THREE.BoxGeometry(W, H, .003), [ed, ed, ed, ed, mk(front), mk(back)]));
     }
-    let rx = .1, ry = -.5, vy = 0, z = 1, dr = false, lx = 0, ly = 0, bz = 8, raf = 0;
-    const rd = () => { grp.rotation.set(rx, ry, 0); cam.position.z = bz / z; r.render(sc, cam); };
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches, T = Math.PI * 2;
+    let rx = .1, ry = reduced ? -.5 : -3.4, vy = 0, z = 1, dr = false, lx = 0, ly = 0, bz = 8, raf = 0, tr = null, intro = !reduced, idle = !reduced && opts.idle !== false, t0 = performance.now(), px = 0;
+    const lim = v => Math.max(.7, Math.min(1.8, v));
+    const rd = () => { grp.rotation.set(rx, ry, 0); d1.position.set(3 + px * 4, 4, 6); cam.position.z = bz / z; r.render(sc, cam); };
+    const stop = () => { idle = false; };
+    const tick = () => {
+      raf = 0; if (dr) return; const now = performance.now(); let more = false;
+      if (intro) { const k = Math.min(1, (now - t0) / 1100); ry = -3.4 + 2.9 * (1 - Math.pow(1 - k, 3)); if (k < 1) more = true; else intro = false; }
+      else if (tr !== null) { ry += (tr - ry) * .12; if (Math.abs(tr - ry) < .002) { ry = tr; tr = null; } else more = true; }
+      else if (Math.abs(vy) > .0005) { ry += vy; vy *= .93; more = true; }
+      else if (idle && now - t0 < 6500) { ry = -.5 + Math.sin((now - t0) / 650) * .3 * (1 - (now - t0) / 6500); more = true; }
+      rd(); if (more) raf = requestAnimationFrame(tick);
+    };
+    const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
     const fit = () => {
       const w = host.clientWidth, h = host.clientHeight; if (!w || !h) return;
       r.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix();
       bz = Math.max(H * 1.3, W * 1.5 / cam.aspect) / 2 / Math.tan(17.5 * Math.PI / 180); rd();
     };
-    new ResizeObserver(fit).observe(host); fit();
-    const loop = () => { if (dr) return; ry += vy; vy *= .93; rd(); raf = Math.abs(vy) > .0005 ? requestAnimationFrame(loop) : 0; };
-    host.addEventListener("pointerdown", e => { if (e.target.closest("button")) return; dr = true; vy = 0; lx = e.clientX; ly = e.clientY; host.setPointerCapture(e.pointerId); });
-    host.addEventListener("pointermove", e => { if (!dr) return; vy = (e.clientX - lx) * .01; ry += vy; rx = Math.max(-1, Math.min(1, rx + (e.clientY - ly) * .008)); lx = e.clientX; ly = e.clientY; rd(); });
-    const up = () => { if (!dr) return; dr = false; cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); };
+    new ResizeObserver(fit).observe(host); fit(); kick();
+    host.querySelector(".vload")?.classList.add("off"); host.classList.add("ready");
+    host.addEventListener("pointerdown", e => { if (e.target.closest("button")) return; dr = true; intro = false; tr = null; stop(); vy = 0; lx = e.clientX; ly = e.clientY; host.setPointerCapture(e.pointerId); });
+    host.addEventListener("pointermove", e => {
+      if (!dr) { if (e.pointerType === "mouse") { const b = host.getBoundingClientRect(); px = (e.clientX - b.left) / b.width - .5; if (!raf && !intro) rd(); } return; }
+      vy = (e.clientX - lx) * .01; ry += vy; rx = Math.max(-1, Math.min(1, rx + (e.clientY - ly) * .008)); lx = e.clientX; ly = e.clientY; rd();
+    });
+    const up = () => { if (!dr) return; dr = false; cancelAnimationFrame(raf); raf = 0; kick(); };
     host.addEventListener("pointerup", up); host.addEventListener("pointercancel", up);
-    host.addEventListener("wheel", e => { e.preventDefault(); z = Math.max(.7, Math.min(1.8, z - e.deltaY * .001)); rd(); }, { passive: false });
-    host.querySelectorAll("[data-z]").forEach(b => b.onclick = () => { z = Math.max(.7, Math.min(1.8, z + b.dataset.z * .2)); rd(); });
+    if (opts.zoom !== false) host.addEventListener("wheel", e => { const n = lim(z - e.deltaY * .001); if (n !== z) { e.preventDefault(); z = n; stop(); rd(); } }, { passive: false });
+    host.querySelectorAll("[data-z]").forEach(b => b.onclick = () => { z = lim(z + b.dataset.z * .2); stop(); rd(); });
+    host.querySelectorAll("[data-face]").forEach(b => b.onclick = () => {
+      const f = +b.dataset.face * Math.PI; intro = false; stop(); tr = f + T * Math.round((ry - f) / T); kick();
+      host.querySelectorAll("[data-face]").forEach(x => x.classList.toggle("on", x === b));
+    });
+    host.addEventListener("keydown", e => {
+      const k = { ArrowLeft: () => ry -= .2, ArrowRight: () => ry += .2, ArrowUp: () => rx = Math.max(-1, rx - .1), ArrowDown: () => rx = Math.min(1, rx + .1), "+": () => z = lim(z + .2), "-": () => z = lim(z - .2) }[e.key];
+      if (k) { e.preventDefault(); intro = false; stop(); k(); rd(); }
+    });
   }
 
-  DH.viewer = function (host, p) {
-    host.innerHTML = `<canvas></canvas><div class="vz"><button data-z="1" aria-label="Aproximar">${DH.ICON.plus}</button><button data-z="-1" aria-label="Afastar">${DH.ICON.minus}</button></div><p class="vh">Arraste para girar</p>`;
-    loadThree().then(() => build(host, p)).catch(() => { host.innerHTML = `<div class="fb"><img src="${p.image}" alt="${p.name}"></div>`; });
+  DH.viewer = function (host, p, opts = {}) {
+    const fallback = () => { host.innerHTML = `<div class="fb"><img src="${p.image}" alt="${DH.esc(p.name)}"></div>`; };
+    const gl = (() => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch (e) { return false; } })();
+    const weak = (navigator.connection && navigator.connection.saveData) || (navigator.deviceMemory && navigator.deviceMemory <= 2);
+    const full = opts.controls !== false;
+    host.innerHTML = `<canvas aria-hidden="true"></canvas>${full ? `<span class="cl" aria-hidden="true">${DH.CL.base}</span><div class="vf"><button class="on" data-face="0">Frente</button><button data-face="1">Verso</button></div><div class="vz"><button data-z="1" aria-label="Aproximar">${DH.ICON.plus}</button><button data-z="-1" aria-label="Afastar">${DH.ICON.minus}</button></div><p class="vh">Arraste para girar · role para aproximar</p>` : ""}<div class="vload" aria-hidden="true">${DH.CL.sim}</div>`;
+    const start = () => loadThree().then(() => build(host, p, opts)).catch(fallback);
+    if (!gl) return fallback();
+    if (weak && !opts.force) { host.innerHTML = '<div class="fb"><img src="' + p.image + '" alt="' + DH.esc(p.name) + '"><button class="btn y" style="position:absolute;bottom:20px" id="v3on">Ativar 3D</button></div>'; host.querySelector("#v3on").onclick = () => { host.innerHTML = ""; DH.viewer(host, p, { ...opts, force: true }); }; return; }
+    start();
   };
 })();

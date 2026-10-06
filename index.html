@@ -3,37 +3,36 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0B1220">
+<meta name="theme-color" content="#2972B7">
 <title>DeckHub TCG</title>
 <meta name="description" content="Boosters e cartas individuais de Pokémon TCG com compra direta pelo site e pagamento via Pix.">
 <meta property="og:title" content="DeckHub TCG"><meta property="og:description" content="Boosters e cartas individuais de Pokémon TCG com compra direta pelo site e pagamento via Pix."><meta property="og:image" content="images/logo.png"><meta property="og:locale" content="pt_BR">
 <link rel="icon" href="images/logo-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@800;900&family=Jost:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body data-page="home">
 <div id="site-header"></div>
 <main id="app">
-<div class="wrap">
-  <section class="hero">
+<section class="hero" id="hero" aria-labelledby="h1">
+  <span class="cl cl1" id="cl1" aria-hidden="true"></span><span class="cl cl2" id="cl2" aria-hidden="true"></span><span class="ghost" id="ghost" aria-hidden="true"></span>
+  <div class="dragon" data-lane="hero" aria-hidden="true"></div>
+  <div class="wrap hin">
     <div>
-      <span class="eye">DeckHub TCG</span>
-      <h1>Seu Hub de <em>TCG</em></h1>
-      <p>Boosters e cartas individuais de Pokémon TCG, direto no site e com pagamento via Pix.</p>
-      <div class="cta"><a class="btn p" href="produtos">Explorar produtos</a><a class="btn s" href="produtos?tipo=carta">Ver cartas</a></div>
+      <span class="eye" style="color:var(--am)">DeckHub TCG · Pokémon TCG</span>
+      <h1 id="h1"><span>Collect</span><span class="y">Play</span><span>Repeat</span></h1>
+      <p>Boosters e cartas individuais de Pokémon TCG.</p>
+      <div class="cta"><a class="btn y" href="produtos">Explorar catálogo</a></div>
     </div>
-    <a class="hstage" href="produto/?slug=mega-greninja-ex" aria-label="Ver Mega Greninja ex"><img src="images/cards/mega-greninja-ex.png" alt="Mega Greninja ex"></a>
-  </section>
-</div>
+    <div class="hstage" id="hstage" data-slug="mega-greninja-ex"><img class="st" src="images/cards/mega-greninja-ex.png" alt="Mega Greninja ex, carta em destaque" width="330" height="460"><span class="tag">Arraste para girar</span></div>
+  </div>
+</section>
 <section class="s"><div class="wrap"><div class="sh"><h2>Em destaque</h2><a href="produtos">Ver todos</a></div><div class="grid" id="featured"></div></div></section>
-<section class="s"><div class="wrap"><div class="sh"><h2>Categorias</h2></div>
+<section class="s dk"><div class="wrap"><div class="sh"><h2>Escolha o seu universo</h2></div>
   <div class="cats"><a class="cat" href="produtos?tipo=booster"><img class="cat-img" src="images/categorias/boosters.webp" alt="" loading="lazy"><h3>Boosters</h3><span>Pokémon TCG</span></a><a class="cat" href="produtos?tipo=carta"><img class="cat-img" src="images/categorias/cartas.webp" alt="" loading="lazy"><h3>Cartas individuais</h3><span>Pokémon TCG</span></a></div></div></section>
-<section class="s"><div class="wrap bn">
-  <div><b></b><p></p></div>
-  <div><b></b><p></p></div>
-  <div><b></b><p></p></div></div></section>
-<section class="s"><div class="wrap"><div class="help"><div><h2>Precisa de ajuda?</h2><p>Fale com a DeckHub.</p></div><a class="btn y" id="helpwa" href="https://wa.me/558499370883" target="_blank" rel="noopener">Chamar no WhatsApp</a></div></div></section>
+<section class="s">
+<section class="s"><div class="wrap"><div class="help-visual rv"><img src="images/dragao/ajuda-secao.webp" alt="Dragão da DeckHub" width="960" height="659" loading="lazy" decoding="async"></div><div class="help"><div><h2>Precisa de ajuda?</h2><p>Fale com a DeckHub.</p></div><a class="btn y" id="helpwa" href="https://wa.me/558499370883" target="_blank" rel="noopener">Chamar no WhatsApp</a></div></div></div></section>
 </main>
 <div id="site-footer"></div>
 <script src="js/data.js"></script>
@@ -41,5 +40,6 @@
 <script src="js/app.js"></script>
 <script src="js/viewer.js"></script>
 <script src="js/pages.js"></script>
+<script src="js/fx.js" defer></script>
 </body>
 </html>

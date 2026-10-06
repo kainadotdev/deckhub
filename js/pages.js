@@ -12,7 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const t = q.value.toLowerCase();
       const l = PRODUCTS.filter(p => (tipo === "todos" || (tipo === "booster") === !!p.isBooster) && `${p.name} ${p.setCode} ${p.tcg} ${p.character || ""}`.toLowerCase().includes(t));
       if (sort === "asc") l.sort((a, b) => a.price - b.price); if (sort === "desc") l.sort((a, b) => b.price - a.price); if (sort === "new") l.reverse();
-      $("#grid").innerHTML = l.length ? l.map(card).join("") : '<p class="muted" style="grid-column:1/-1">Nenhum produto encontrado.</p>';
+      $("#count").textContent = l.length + (l.length === 1 ? " produto" : " produtos"); $("#pcl").innerHTML = DH.CL.topo;
+      $("#grid").innerHTML = l.length ? l.map(card).join("") : '<p class="muted" style="grid-column:1/-1">Nenhum produto encontrado. Tente outra busca ou veja todos os produtos.</p>';
       $$(".chip").forEach(c => c.classList.toggle("on", c.dataset.t === tipo));
     };
     q.oninput = draw; $("#sort").onchange = e => { sort = e.target.value; draw(); };
@@ -37,23 +38,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const eds = items.length ? `<section class="eds"><div class="wrap"><div class="sh"><div><h2>${same.length ? "Outras Edições de " + p.character : "Outros Produtos Relacionados"}</h2>
       <p>${same.length ? "Versões e variações desta mesma carta disponíveis em nosso catálogo." : "Confira outros itens disponíveis em nossa loja."}</p></div>
       <div class="ar"><button id="eprev" aria-label="Anterior">${ICON.left}</button><button id="enext" aria-label="Próximo">${ICON.right}</button></div></div>
-      <div class="ect" id="ect">${items.map(e => { const k = stk(e.stock); return `<a class="ec" href="${href(e)}"><span class="cd">${e.setCode !== "—" ? e.setCode + (e.cardNumber ? " " + e.cardNumber.split("index.html")[0] : "") : e.isBooster ? "BOOSTER" : "CARTA"}</span>
-        <div class="im"><img src="${e.image}" alt="${e.name}" loading="lazy"></div><div class="bd"><span class="nm">${e.name}</span>${e.cardNumber ? `<span class="sm">(${e.cardNumber})</span>` : ""}
-        <span class="av ${k.c}"><i></i>${k.t}</span><span class="pr">${brl(e.price)}</span><span class="vb">Ver produto</span></div></a>`; }).join("")}</div></div></section>` : "";
+      <div class="ect" id="ect">${items.map(card).join("")}</div></div></section>` : "";
     $("#app").innerHTML = `<div class="wrap"><nav class="crumb"><a href="index.html">Início</a> / <a href="produtos">Produtos</a> / ${p.name}</nav>
-      <div class="pd"><div class="stage" id="stage"></div><div>
+      <div class="pd"><div class="stage" id="stage" tabindex="0" role="group" aria-label="Visualizador 3D de ${p.name}. Arraste para girar."></div><div>
       <span class="tp">${p.isBooster ? "Booster" : p.category} · ${p.tcg}</span><h1>${p.name}</h1><div class="big">${brl(p.price)}</div>
       <div class="av ${s.c}" style="margin-top:8px;font-size:14px"><i></i>${s.t}${p.stock > 0 ? " · Envio imediato" : ""}</div>
       <p class="muted" style="margin-top:16px">${p.description}</p>
       <dl class="specs">${specs.map(x => `<div><dt>${x[0]}</dt><dd>${x[1]}</dd></div>`).join("")}</dl>
       ${p.stock > 0 ? `<div class="buy"><div class="qty"><button id="qm" aria-label="Diminuir">${ICON.minus}</button><span id="qv">1</span><button id="qp" aria-label="Aumentar">${ICON.plus}</button></div>
       <button class="btn p" id="addbtn">Adicionar ao carrinho</button></div>` : '<div class="buy"><button class="btn s" disabled>Indisponível</button></div>'}
-      </div></div></div>${eds}`;
+      </div></div></div>${p.stock > 0 ? `<div class="buybar"><b>${brl(p.price)}</b><button class="btn y" id="addbar">Adicionar</button></div>` : ""}${eds}`;
     DH.viewer($("#stage"), p);
     if (p.stock > 0) {
       let q = 1; const v = $("#qv");
       $("#qm").onclick = () => v.textContent = q = Math.max(1, q - 1); $("#qp").onclick = () => v.textContent = q = Math.min(p.stock, q + 1);
-      $("#addbtn").onclick = () => { add(p.id, q); toast("Adicionado ao carrinho"); openDrawer(true); };
+      const go = () => { add(p.id, q); toast("Adicionado ao carrinho"); openDrawer(true); }; $("#addbtn").onclick = go; $("#addbar").onclick = go;
     }
     const t = $("#ect"); if (t) { $("#eprev").onclick = () => t.scrollBy({ left: -t.clientWidth * .8 }); $("#enext").onclick = () => t.scrollBy({ left: t.clientWidth * .8 }); }
   };
