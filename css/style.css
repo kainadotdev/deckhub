@@ -19,7 +19,7 @@ a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;color:in
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 /* header */
 header.top{position:sticky;top:0;z-index:30;background:var(--az);color:var(--br);border-bottom:3px solid var(--am)}
-.hd{display:flex;align-items:center;gap:20px;height:64px}.logo img{height:38px;width:auto}
+.hd{display:flex;align-items:center;gap:20px;height:64px}.logo img{height:50px;width:auto}
 .nav{display:flex;gap:26px;font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;margin-left:16px}
 .nav a{padding:6px 0;border-bottom:3px solid transparent}.nav a:hover,.nav a.on{border-color:var(--am)}.sp{flex:1}
 .sb{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;width:260px;background:var(--br);color:var(--pr);border-radius:2px}
@@ -153,5 +153,6 @@ footer.ft{position:relative;overflow:hidden;background:var(--pr);color:var(--br)
 .pc .im .cl{position:absolute;right:-18%;top:-8%;width:80%;color:var(--am);opacity:.9;transition:transform .5s var(--ease);z-index:0}
 .pc:hover .im .cl{transform:translate(-6%,6%)}
 .pc .im img{position:absolute;inset:0;margin:auto;height:84%;width:auto;max-width:84%;z-index:1}
-@media(max-width:900px){.hstage{height:300px;margin-top:0}.hstage img.st{height:280px}.hero .hin{padding-top:24px}}
+/* celular/tablet estreito: sem a carta em destaque (a carta 3D segue no desktop) */
+@media(max-width:900px){.hstage{display:none}.hero .hin{padding-top:44px;padding-bottom:72px}}
 .grid>*,.pc{min-width:0}.tools{max-width:100%}

@@ -67,7 +67,7 @@ document.documentElement.classList.add("js");
     const nav = [["Início", "index.html", "home"], ["Produtos", "produtos", "produtos"], ["Categorias", "produtos?tipo=carta", ""]];
     $("#site-header").outerHTML = `<header class="top"><div class="wrap hd">
       <button class="ib mbtn" id="mbtn" aria-label="Menu">${ICON.menu}</button>
-      <a href="index.html" class="logo" aria-label="DeckHub TCG — início"><img src="images/marca/logo-escuro.webp" alt="DeckHub TCG" width="60" height="39"></a>
+      <a href="index.html" class="logo" aria-label="DeckHub TCG — início"><img src="images/marca/logo-escuro1.webp" alt="DeckHub TCG" width="70" height="39"></a>
       <nav class="nav">${nav.map(n => `<a href="${n[1]}" class="${n[2] === page ? "on" : ""}">${n[0]}</a>`).join("")}</nav><div class="sp"></div>
       <form class="sb" action="produtos" method="get">${ICON.search}<input name="q" placeholder="Buscar produtos..." aria-label="Buscar"></form>
       <button class="ib" id="cbtn" aria-label="Carrinho">${ICON.cart}<span class="cnt" id="cnt">0</span></button></div>
